@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Chat;
 use App\Models\Contact;
+use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -23,17 +24,11 @@ class ChatController extends Controller
         return view('contact.index',compact('chat','contact'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request, $id)
     {
         $chat = new Chat;
@@ -45,9 +40,17 @@ class ChatController extends Controller
         return redirect()->back();
     }
 
-    /**
-     * Display the specified resource.
-     */
+    public function storeG(Request $request, $id)
+    {
+        $chat = new Chat;
+        $chat->from = Auth::user()->id;
+        $chat->to_group = $id;
+        $chat->messages = $request->message;
+        $chat->save();
+
+        return redirect()->back();
+    }
+
     public function show($id)
     {
         // $chat = Chat::all()->where('from', '=', Auth::user()->id, 'to', '=', $id);
@@ -71,17 +74,27 @@ class ChatController extends Controller
         return view('chat.show',compact('chat','id','contact','contacts'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    public function group($id)
+    {
+        // $chat = Chat::all()->where('from', '=', Auth::user()->id, 'to', '=', $id);
+        $contacts = Contact::where('maker', '=', Auth::user()->id)
+    ->get();
+        $group = Group::find($id);
+        $chat = Chat::where('to_group', '=', $id)
+        ->where('status','=','a')
+        ->orWhere('from', '=', Auth::user()->id)
+        ->where('to_group', '=', $id)
+        ->where('status','=','s')
+        ->orderBy('created_at', 'asc')
+        ->get();
+        return view('chat.group',compact('chat','id','group','contacts'));
+    }
+
     public function edit(Chat $chat)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Chat $chat)
     {
         $chat->messages = $request->message;
@@ -90,9 +103,6 @@ class ChatController extends Controller
         return redirect()->back();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroyme($id)
     {
         $chat = Chat::find($id);

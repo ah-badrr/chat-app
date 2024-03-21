@@ -113,7 +113,7 @@
                     @endphp
                     @foreach ($group as $g)
                         <li class="menu-item">
-                            <a href="#" class="menu-link">
+                            <a href="{{ route('chat.group', $g->id) }}" class="menu-link">
                                 <i class="menu-icon tf-icons bx bx-group"></i>
                                 <div data-i18n="Analytics">{{ $g->nama_group }}</div>
                             </a>

@@ -18,7 +18,7 @@
                                                 class="rounded-circle">
                                         </div>
                                         <div class="chat-contact-info flex-grow-1 ms-3">
-                                            <h6 class="m-0">{{ $contact->name }}</h6>
+                                            <h6 class="m-0">{{ $group->nama_group }}</h6>
                                             <small class="user-status text-muted">NextJS developer</small>
                                         </div>
                                     </div>
@@ -175,7 +175,7 @@
                                 </ul>
                                 <div class="modal fade" id="clearChat" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-sm" role="document">
-                                        <form action="{{ route('chat.clear', $contact->id) }}" method="post"
+                                        <form action="{{ route('chat.clear', $group->id) }}" method="post"
                                             class="modal-content">
                                             @method('PUT')
                                             @csrf
@@ -197,7 +197,7 @@
                                 </div>
                             </div>
                             <div class="card-footer border-top">
-                                <form action="{{ route('chat.store', $id) }}" method="post">
+                                <form action="{{ route('chat.storeG', $id) }}" method="post">
                                     @csrf
                                     <div class="input-group">
                                         <input type="text" name="message" placeholder="Type Message ..."

@@ -42,8 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('/contact', ContactController::class);
     Route::resource('/chat', ChatController::class);
     Route::put('/chat/destroyme/{id}', [ChatController::class, 'destroyme'])->name('chat.destroyme');
+    Route::get('/chat/group/{id}', [ChatController::class, 'group'])->name('chat.group');
     Route::put('/chat/clear/{id}', [ChatController::class, 'clear'])->name('chat.clear');
     Route::post('/chat/store/{id}', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('/chat/storeG/{id}', [ChatController::class, 'storeG'])->name('chat.storeG');
 });
 
 require __DIR__ . '/auth.php';
