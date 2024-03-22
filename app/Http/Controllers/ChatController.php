@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chat;
+use App\Models\Hide;
 use App\Models\Contact;
 use App\Models\Group;
 use Illuminate\Http\Request;
@@ -19,9 +20,9 @@ class ChatController extends Controller
     public function index(Request $id)
     {
         $contact = Contact::where('maker', '=', Auth::user()->id)
-    ->get();
+            ->get();
         $chat = Chat::all()->where('from', '=', Auth::user()->id, '&&', 'to', '=', $id);
-        return view('contact.index',compact('chat','contact'));
+        return view('contact.index', compact('chat', 'contact'));
     }
 
     public function create()
@@ -55,39 +56,36 @@ class ChatController extends Controller
     {
         // $chat = Chat::all()->where('from', '=', Auth::user()->id, 'to', '=', $id);
         $contacts = Contact::where('maker', '=', Auth::user()->id)
-    ->get();
+            ->get();
         $contact = User::find($id);
         $chat = Chat::where('from', '=', Auth::user()->id)
-        ->where('to', '=', $id)
-        ->where('status','=','a')
-        ->orWhere('from', '=', Auth::user()->id)
-        ->where('to', '=', $id)
-        ->where('status','=','s')
-        ->orWhere('from', '=', $id)
-        ->where('status','=','a')
-        ->where('to', '=', Auth::user()->id)
-        ->orWhere('from', '=', $id)
-        ->where('status','=','r')
-        ->where('to', '=', Auth::user()->id)
-        ->orderBy('created_at', 'asc')
-        ->get();
-        return view('chat.show',compact('chat','id','contact','contacts'));
+            ->where('to', '=', $id)
+            ->where('status', '=', 'a')
+            ->orWhere('from', '=', Auth::user()->id)
+            ->where('to', '=', $id)
+            ->where('status', '=', 's')
+            ->orWhere('from', '=', $id)
+            ->where('status', '=', 'a')
+            ->where('to', '=', Auth::user()->id)
+            ->orWhere('from', '=', $id)
+            ->where('status', '=', 'r')
+            ->where('to', '=', Auth::user()->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+        return view('chat.show', compact('chat', 'id', 'contact', 'contacts'));
     }
 
     public function group($id)
     {
         // $chat = Chat::all()->where('from', '=', Auth::user()->id, 'to', '=', $id);
         $contacts = Contact::where('maker', '=', Auth::user()->id)
-    ->get();
+            ->get();
         $group = Group::find($id);
         $chat = Chat::where('to_group', '=', $id)
-        ->where('status','=','a')
-        ->orWhere('from', '=', Auth::user()->id)
-        ->where('to_group', '=', $id)
-        ->where('status','=','s')
-        ->orderBy('created_at', 'asc')
-        ->get();
-        return view('chat.group',compact('chat','id','group','contacts'));
+            ->where('status', '=', 'a')
+            ->orderBy('created_at', 'asc')
+            ->get();
+        return view('chat.group', compact('chat', 'id', 'group', 'contacts'));
     }
 
     public function edit(Chat $chat)
@@ -114,7 +112,7 @@ class ChatController extends Controller
         } else if ($chat->from != Auth::user()->id && $chat->status == 'a') {
             $chat->status = 's';
             $chat->save();
-        } else if($chat->from != Auth::user()->id && $chat->status == 'r') {
+        } else if ($chat->from != Auth::user()->id && $chat->status == 'r') {
             $chat->delete();
         }
         return redirect()->back();
@@ -123,15 +121,19 @@ class ChatController extends Controller
     public function destroy($id)
     {
         $chat = Chat::find($id);
+        $hide = Hide::where('chat_id', '=', $id)->get();
+        foreach ($hide as $h) {
+            $h->delete();
+        };
         $chat->delete();
         return redirect()->back();
     }
 
     public function clear($id)
     {
-        $chat = Chat::where('from','=',Auth::user()->id)
-        ->where('to','=',$id)
-        ->get();
+        $chat = Chat::where('from', '=', Auth::user()->id)
+            ->where('to', '=', $id)
+            ->get();
         foreach ($chat as $c) {
             if ($c->status == 'a') {
                 $c->status = 'r';
@@ -142,9 +144,9 @@ class ChatController extends Controller
             }
         }
 
-        $chats = Chat::where('from','=',$id)
-        ->where('to','=',Auth::user()->id)
-        ->get();
+        $chats = Chat::where('from', '=', $id)
+            ->where('to', '=', Auth::user()->id)
+            ->get();
         foreach ($chats as $c) {
             if ($c->status == 'a') {
                 $c->status = 's';
@@ -152,6 +154,41 @@ class ChatController extends Controller
             }
             if ($c->status == 'r') {
                 $c->delete();
+            }
+        }
+        return redirect()->back();
+    }
+
+    public function clearg($id)
+    {
+        $chat = Chat::where('from', '=', Auth::user()->id)
+            ->where('to_group', '=', $id)
+            ->get();
+        foreach ($chat as $c) {
+            $hide = Hide::where('user_id', '=', Auth::user()->id)
+                ->where('chat_id', '=', $c->id)
+                ->get();
+            if ($hide->count() == null) {
+                $hide = Hide::where('chat_id', '=', $c->id)->get();
+                foreach ($hide as $h) {
+                    $h->delete();
+                };
+                $c->delete();
+            }
+        }
+
+        $chats = Chat::where('from', '!=', Auth::user()->id)
+            ->where('to_group', '=', $id)
+            ->get();
+        foreach ($chats as $c) {
+            $hide = Hide::where('user_id', '=', Auth::user()->id)
+                ->where('chat_id', '=', $c->id)
+                ->get();
+            if ($hide->count() == null) {
+                $hide = new Hide;
+                $hide->user_id = Auth::user()->id;
+                $hide->chat_id = $c->id;
+                $hide->save();
             }
         }
         return redirect()->back();

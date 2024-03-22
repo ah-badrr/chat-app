@@ -5,6 +5,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\HideController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Chat;
 use Illuminate\Support\Facades\Auth;
@@ -41,10 +42,14 @@ Route::middleware('auth')->group(function () {
     });
     Route::resource('/contact', ContactController::class);
     Route::resource('/chat', ChatController::class);
+    Route::resource('/group', GroupController::class);
+    Route::resource('/hide', HideController::class);
     Route::put('/chat/destroyme/{id}', [ChatController::class, 'destroyme'])->name('chat.destroyme');
     Route::get('/chat/group/{id}', [ChatController::class, 'group'])->name('chat.group');
     Route::put('/chat/clear/{id}', [ChatController::class, 'clear'])->name('chat.clear');
+    Route::put('/chat/clearg/{id}', [ChatController::class, 'clearg'])->name('chat.clearg');
     Route::post('/chat/store/{id}', [ChatController::class, 'store'])->name('chat.store');
+    Route::post('/hide/store/{id}', [HideController::class, 'store'])->name('hide.store');
     Route::post('/chat/storeG/{id}', [ChatController::class, 'storeG'])->name('chat.storeG');
 });
 

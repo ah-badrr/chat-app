@@ -48,54 +48,66 @@
                                 style="background:#F5F5F9;height: 28rem; overflow:auto !important; padding:2rem 2rem;">
                                 <ul class="list-unstyled chat-history mb-0">
                                     @foreach ($chat as $c)
-                                        <li class="d-flex mb-3 {{ $c->from == Auth::user()->id ? 'justify-content-end' : '' }} "
-                                            style="width:100% !important">
-                                            @if ($c->from != Auth::user()->id)
-                                                <div class="user-avatar flex-shrink-0 me-3">
-                                                    <div class="avatar avatar-sm">
-                                                        <img src="{{ asset('dist') }}/assets/img/avatars/1.png"
-                                                            alt="Avatar" class="rounded-circle">
+                                        @php
+                                            $hide = DB::table('hide')
+                                                ->where('user_id', '=', Auth::user()->id)
+                                                ->where('chat_id', '=', $c->id)
+                                                ->get();
+                                        @endphp
+                                        @if (count($hide) == null)
+                                            <li class="d-flex mb-3 {{ $c->from == Auth::user()->id ? 'justify-content-end' : '' }} "
+                                                style="width:100% !important">
+                                                @if ($c->from != Auth::user()->id)
+                                                    <div class="user-avatar flex-shrink-0 me-3">
+                                                        <div class="avatar avatar-sm">
+                                                            <img src="{{ asset('dist') }}/assets/img/avatars/1.png"
+                                                                alt="Avatar" class="rounded-circle">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            @endif
-                                            <p class="position-relative text-wrap {{ $c->from == Auth::user()->id ? 'bg-primary text-white' : 'bg-white' }} shadow-sm pt-2 pb-3 ps-4 pe-5 mb-0"
-                                                style="text-wrap: wrap !important; width: max-content; max-width: 70%; border-radius: 10px 0 10px 10px;"
-                                                type="button"id="chat-header-actions" data-bs-toggle="dropdown"
-                                                aria-haspopup="true" aria-expanded="false">
-                                                {{ $c->messages }}
-                                                <span class="small position-absolute" style="bottom: 0px; right:7px">
-                                                    <small>{{ $c->created_at->isoFormat('HH:mm') }}</small>
-                                                </span>
-                                            </p>
-                                            <div class="dropdown-menu dropdown-menu-end"
-                                                aria-labelledby="chat-header-actions">
-
-                                                <button type="button" class="dropdown-item" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteMe{{ $c->id }}">
-                                                    <i class="fas fa-right-from-bracket mr-2"></i>Delete for me
-                                                </button>
-                                                @if ($c->from == Auth::user()->id)
-                                                    <button type="button" class="dropdown-item" data-bs-toggle="modal"
-                                                        data-bs-target="#deleteAll{{ $c->id }}">
-                                                        <i class="fas fa-right-from-bracket mr-2"></i>Delete for all
-                                                    </button>
-
-                                                    <button type="button" class="dropdown-item" data-bs-toggle="modal"
-                                                        data-bs-target="#basicModal{{ $c->id }}">
-                                                        <i class="fas fa-edit mr-2"></i>Edit
-                                                    </button>
                                                 @endif
-                                            </div>
-                                            @if ($c->from == Auth::user()->id)
-                                                <div class="user-avatar flex-shrink-0 ms-3">
-                                                    <div class="avatar avatar-sm">
-                                                        <img src="{{ asset('dist') }}/assets/img/avatars/1.png"
-                                                            alt="Avatar" class="rounded-circle">
+                                                <div class="card position-relative text-wrap {{ $c->from == Auth::user()->id ? 'bg-primary text-white text-end' : 'bg-white' }} shadow-sm p-0 mb-0"
+                                                    style="text-wrap: wrap !important; width: max-content; max-width: 70%; border-radius: 10px 0 10px 10px;"
+                                                    type="button"id="chat-header-actions" data-bs-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                    <div class="card-header py-0 px-2 pt-1 small">
+                                                        <small>{{ $c->suser->name }}</small>
+                                                    </div>
+                                                    <div class="card-body py-0 px-2">{{ $c->messages }}</div>
+                                                    <div
+                                                        class="card-footer px-2 {{ $c->from == Auth::user()->id ? 'text-start' : 'text-end' }} py-0 pb-1 small">
+                                                        <small>{{ $c->created_at->isoFormat('HH:mm') }}</small>
                                                     </div>
                                                 </div>
-                                            @endif
+                                                <div class="dropdown-menu dropdown-menu-end"
+                                                    aria-labelledby="chat-header-actions">
 
-                                        </li>
+                                                    <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                                                        data-bs-target="#deleteMe{{ $c->id }}">
+                                                        <i class="fas fa-right-from-bracket mr-2"></i>Delete for me
+                                                    </button>
+                                                    @if ($c->from == Auth::user()->id)
+                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                                                            data-bs-target="#deleteAll{{ $c->id }}">
+                                                            <i class="fas fa-right-from-bracket mr-2"></i>Delete for all
+                                                        </button>
+
+                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                                                            data-bs-target="#basicModal{{ $c->id }}">
+                                                            <i class="fas fa-edit mr-2"></i>Edit
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                                @if ($c->from == Auth::user()->id)
+                                                    <div class="user-avatar flex-shrink-0 ms-3">
+                                                        <div class="avatar avatar-sm">
+                                                            <img src="{{ asset('dist') }}/assets/img/avatars/1.png"
+                                                                alt="Avatar" class="rounded-circle">
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                            </li>
+                                        @endif
                                         <div class="modal fade" id="basicModal{{ $c->id }}" tabindex="-1"
                                             aria-hidden="true">
                                             <div class="modal-dialog" role="document">
@@ -105,7 +117,8 @@
                                                     @csrf
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="exampleModalLabel1">Edit Messages
+                                                            <h5 class="modal-title" id="exampleModalLabel1">Edit
+                                                                Messages
                                                             </h5>
                                                             <button type="button" class="btn-close"
                                                                 data-bs-dismiss="modal" aria-label="Close"></button>
@@ -151,9 +164,8 @@
                                         <div class="modal fade" id="deleteMe{{ $c->id }}" tabindex="-1"
                                             aria-hidden="true">
                                             <div class="modal-dialog modal-sm" role="document">
-                                                <form action="{{ route('chat.destroyme', $c->id) }}" method="post"
+                                                <form action="{{ route('hide.store', $c->id) }}" method="post"
                                                     class="modal-content">
-                                                    @method('PUT')
                                                     @csrf
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -175,7 +187,7 @@
                                 </ul>
                                 <div class="modal fade" id="clearChat" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog modal-sm" role="document">
-                                        <form action="{{ route('chat.clear', $group->id) }}" method="post"
+                                        <form action="{{ route('chat.clearg', $group->id) }}" method="post"
                                             class="modal-content">
                                             @method('PUT')
                                             @csrf

@@ -84,12 +84,6 @@
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Contact</span>
                     </li>
-                    @php
-                        $user = DB::table('user')
-                            ->where('id', '!=', Auth::user()->id)
-                            ->get();
-
-                    @endphp
                     @foreach ($contacts as $c)
                         <li class="menu-item">
                             <a href="{{ route('chat.show', $c->rec->id) }}" class="menu-link">
